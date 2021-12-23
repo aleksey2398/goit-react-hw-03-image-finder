@@ -17,6 +17,7 @@ class App extends Component {
     isModalOpen: false,
     isLoading: false,
     error: null,
+    
   };
 
   componentDidUpdate(_, prevState) {
@@ -29,14 +30,23 @@ class App extends Component {
     const { searchQuery, currentPage } = this.state;
     this.setState({ isLoading: true });
 
-    API.fetchImages(searchQuery, currentPage)
+   API.fetchImages(searchQuery, currentPage)
       .then(({ data }) => {
-        this.setState((prevState) => ({
+        
+        this.setState((prevState) =>{ 
+          if (!data.hits.length){
+            return alert("Impossible to load the pictures")
+          }
+return ({
           images: [...prevState.images, ...data.hits],
           isLoading: false,
+          error: false,
           currentPage: prevState.currentPage + 1,
-        }));
+        });
       })
+        
+      })
+      
       .catch((error) => {
         console.log(error);
       })
@@ -67,11 +77,12 @@ class App extends Component {
   };
 
   render() {
-    const { isModalOpen, images, largeImageURL, isLoading } = this.state;
+    const { isModalOpen, error, images, largeImageURL, isLoading } = this.state;
 
     return (
       <div className="App">
         <SearchBar onSubmit={this.onFormSubmit} />
+        {error && <p>Impossible to load the pictures!</p>}
         <Gallery images={images} onClick={this.getLargeUrl} />
         {isModalOpen && (
           <Modal onClose={this.toggleModal}>
